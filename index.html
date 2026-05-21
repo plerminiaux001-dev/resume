@@ -3,247 +3,804 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peter Lerminiaux - Service Reliability Engineer</title>
+    <title>Peter Lerminiaux | Service Reliability Engineer (SRE)</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Clean modern fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-color: #f4f6f9;
-            --container-bg: #ffffff;
-            --text-main: #2d3748;
-            --text-muted: #718096;
-            --accent-color: #2b6cb0;
-            --accent-light: #ebf8ff;
-            --border-color: #e2e8f0;
+            /* Theme variables: Default Dark Mode */
+            --bg-base: #0b0f19;
+            --bg-panel: #111827;
+            --bg-panel-header: #1f2937;
+            --border-color: #374151;
+            
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            
+            --accent-glow: #00f2fe;
+            --accent-solid: #0ea5e9;
+            --accent-bg: rgba(14, 165, 233, 0.1);
+            
+            --status-success: #10b981;
+            --status-success-bg: rgba(16, 185, 129, 0.1);
+            
+            --panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --transition-speed: 0.25s;
+        }
+
+        /* Light Mode Variables */
+        [data-theme="light"] {
+            --bg-base: #f3f4f6;
+            --bg-panel: #ffffff;
+            --bg-panel-header: #f9fafb;
+            --border-color: #e5e7eb;
+            
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-muted: #9ca3af;
+            
+            --accent-glow: #0284c7;
+            --accent-solid: #0284c7;
+            --accent-bg: rgba(2, 132, 199, 0.08);
+            
+            --status-success: #059669;
+            --status-success-bg: rgba(5, 150, 105, 0.08);
+            
+            --panel-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed) ease, 
+                        border-color var(--transition-speed) ease, 
+                        color var(--transition-speed) ease;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-main);
             margin: 0;
             padding: 40px 20px;
-        }
-
-        .resume-container {
-            max-width: 850px;
-            margin: 0 auto;
-            background: var(--container-bg);
-            padding: 50px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        header {
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.5rem;
-            color: #1a202c;
-            letter-spacing: -0.5px;
-        }
-
-        .title-sub {
-            font-size: 1.25rem;
-            color: var(--accent-color);
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .contact-info {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
+            justify-content: center;
+            min-height: 100vh;
         }
 
-        .contact-info a {
-            color: var(--text-muted);
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        /* UTILITY ELEMENTS & CONTROLS */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--status-success-bg);
+            color: var(--status-success);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-weight: 500;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--status-success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--status-success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .theme-toggle-btn {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            box-shadow: var(--panel-shadow);
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--accent-solid);
+            color: var(--accent-solid);
+        }
+
+        /* HEADER SECTION */
+        header {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            position: relative;
+            box-shadow: var(--panel-shadow);
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-solid);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-main h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+        }
+
+        .header-main .subtitle {
+            font-family: var(--font-mono);
+            color: var(--accent-solid);
+            font-size: 1rem;
+            margin-top: 6px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-item i {
+            color: var(--accent-solid);
+            width: 16px;
+        }
+
+        .contact-item a {
+            color: var(--text-secondary);
             text-decoration: none;
         }
 
-        .contact-info a:hover {
-            color: var(--accent-color);
+        .contact-item a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
         }
 
-        section {
+        /* METRIC PANELS */
+        .metrics-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: var(--panel-shadow);
+            position: relative;
+        }
+
+        .metric-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-family: var(--font-mono);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* MAIN CONTENT WORKSPACE */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media(min-width: 900px) {
+            .workspace {
+                grid-template-columns: 1fr 2fr;
+                align-items: start;
+            }
+        }
+
+        /* REUSABLE PANEL DESIGN (GRAFANA STYLED) */
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--panel-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .panel-header {
+            background-color: var(--bg-panel-header);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-title i {
+            color: var(--accent-solid);
+        }
+
+        .panel-status-indicator {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--status-success);
+        }
+
+        .panel-body {
+            padding: 24px;
+        }
+
+        /* SKILLS STYLING */
+        .skills-section {
+            margin-bottom: 20px;
+        }
+
+        .skills-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .skills-category-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background-color: var(--bg-base);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .tag.tag-hot {
+            color: var(--accent-solid);
+            background: var(--accent-bg);
+            border-color: rgba(14, 165, 233, 0.3);
+            font-weight: 600;
+        }
+
+        /* TIMELINE / WORK HISTORY */
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 10px;
+        }
+
+        .timeline-event {
+            position: relative;
             margin-bottom: 35px;
         }
 
-        h2 {
-            font-size: 1.4rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #1a202c;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 5px;
-            margin-bottom: 15px;
+        .timeline-event:last-child {
+            margin-bottom: 0;
         }
 
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 15px;
+        .timeline-dot {
+            position: absolute;
+            left: -27px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--bg-panel);
+            border: 2px solid var(--accent-solid);
         }
 
-        .skills-category strong {
-            display: block;
-            color: #1a202c;
-            margin-bottom: 5px;
+        .timeline-event.active .timeline-dot {
+            background-color: var(--accent-solid);
+            box-shadow: 0 0 8px var(--accent-solid);
         }
 
-        .job {
-            margin-bottom: 30px;
-        }
-
-        .job-header {
+        .job-meta {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
             flex-wrap: wrap;
-            margin-bottom: 8px;
+            gap: 5px;
+            margin-bottom: 12px;
         }
 
-        .job-title {
+        .job-role {
             font-size: 1.15rem;
             font-weight: 700;
-            color: #1a202c;
+            color: var(--text-primary);
+            margin: 0;
         }
 
-        .company-location {
-            font-size: 1rem;
-            color: var(--accent-color);
+        .job-company {
+            color: var(--accent-solid);
             font-weight: 600;
+            font-size: 0.95rem;
         }
 
-        .job-date {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-style: italic;
+        .job-duration {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        ul {
-            margin: 5px 0 0 0;
-            padding-left: 20px;
+        .timeline-body ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
-        li {
+        .timeline-body li {
             margin-bottom: 8px;
         }
 
-        .sub-job {
-            margin-top: 15px;
-            padding-left: 15px;
-            border-left: 2px solid var(--border-color);
+        .timeline-body li::marker {
+            color: var(--accent-solid);
         }
 
-        @media (max-width: 600px) {
-            body { padding: 10px; }
-            .resume-container { padding: 20px; }
-            .job-header { flex-direction: column; }
+        .nested-progression {
+            margin-top: 15px;
+            padding-left: 15px;
+            border-left: 1px dashed var(--border-color);
+        }
+
+        .nested-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .nested-dates {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        /* PRINT STYLES - Optimized for beautiful print on A4/Letter paper */
+        @media print {
+            body {
+                background: #ffffff;
+                color: #000000;
+                padding: 0;
+            }
+
+            :root {
+                --bg-base: #ffffff;
+                --bg-panel: #ffffff;
+                --bg-panel-header: #f3f4f6;
+                --border-color: #d1d5db;
+                --text-primary: #111827;
+                --text-secondary: #374151;
+                --text-muted: #6b7280;
+                --accent-solid: #0ea5e9;
+                --panel-shadow: none;
+            }
+
+            .dashboard-container {
+                gap: 15px;
+            }
+
+            .controls, .theme-toggle-btn {
+                display: none !important;
+            }
+
+            .metric-card {
+                padding: 10px;
+                border-color: #d1d5db;
+            }
+
+            .panel {
+                border: none;
+                box-shadow: none;
+                margin-bottom: 15px;
+            }
+
+            .panel-header {
+                padding: 6px 0;
+                border-bottom: 2px solid #111827;
+                background: transparent;
+            }
+
+            .panel-title {
+                font-size: 1rem;
+                color: #111827;
+            }
+
+            .panel-body {
+                padding: 12px 0;
+            }
+
+            .timeline-dot {
+                display: none;
+            }
+
+            .timeline {
+                border-left: none;
+                padding-left: 0;
+            }
+
+            .tag {
+                border: 1px solid #9ca3af;
+                background: transparent !important;
+                color: #111827 !important;
+            }
+
+            .workspace {
+                display: block;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="resume-container">
-    <header>
-        <h1>Peter Lerminiaux</h1>
-        <div class="title-sub">Service Reliability Engineer / Observability Specialist</div>
-        <div class="contact-info">
-            <span>📍 Ontario, NY (Open to 100% Remote)</span>
-            <span>📧 <a href="mailto:your.email@example.com">your.email@example.com</a></span>
-            <span>📱 [Your Phone Number]</span>
-            <span>🔗 <a href="https://github.com/your-username">github.com/your-username</a></span>
+    <div class="dashboard-container">
+        
+        <!-- HEADER UTILITIES -->
+        <div class="controls">
+            <div class="system-status">
+                <span class="pulse-dot"></span>
+                <span>STATUS: ACTIVE & REMOTE-READY</span>
+            </div>
+            <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()">
+                <i class="fa-solid fa-sun" id="theme-icon"></i>
+                <span id="theme-text">LIGHT MODE</span>
+            </button>
         </div>
-    </header>
 
-    <section id="summary">
-        <h2>Professional Summary</h2>
-        <p>
-            Highly analytical and growth-driven Service Reliability Engineer specializing in enterprise observability, AIOps, and topology-driven operations. Proven track record of transforming raw telemetry data into actionable, context-rich alerts by architecting and executing robust Configuration Management Databases (CMDB). Expert in bridging the gap between infrastructure metrics and service topology to drastically reduce MTTR in high-scale enterprise environments. Adept at working autonomously in remote environments, leveraging modern AI-accelerated workflows (GitHub Copilot, M365 Copilot) to build resilient, self-healing systems.
-        </p>
-    </section>
+        <!-- MAIN SYSTEM HEADER -->
+        <header>
+            <div class="header-content">
+                <div class="header-main">
+                    <h1>Peter Lerminiaux</h1>
+                    <div class="subtitle">Service Reliability Engineer / Observability Specialist</div>
+                    
+                    <div class="contact-grid">
+                        <div class="contact-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Ontario, NY (100% Remote)</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fa-solid fa-envelope"></i>
+                            <a href="mailto:your.email@example.com">your.email@example.com</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>(555) 123-4567</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fa-solid fa-network-wired"></i>
+                            <a href="https://github.com/your-username" target="_blank">github.com/your-username</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-    <section id="skills">
-        <h2>Technical Core Skills</h2>
-        <div class="skills-grid">
-            <div class="skills-category">
-                <strong>Observability & Monitoring</strong>
-                OpenTelemetry (OTel), Grafana, BMC Helix Operations Mgmt, Dynatrace (Lite)
+        <!-- SRE METRIC CARDS -->
+        <div class="metrics-bar">
+            <div class="metric-card">
+                <div class="metric-label">AVAILABILITY</div>
+                <div class="metric-value">99.99%</div>
+                <div class="metric-desc">High remote productivity uptime</div>
             </div>
-            <div class="skills-category">
-                <strong>Cloud & Infrastructure</strong>
-                Microsoft Azure, Azure APIM, GitHub Pages, Git
+            <div class="metric-card">
+                <div class="metric-label">MEAN TIME TO CONTEXT (MTTC)</div>
+                <div class="metric-value">-75%</div>
+                <div class="metric-desc">Via topology-driven alerting</div>
             </div>
-            <div class="skills-category">
-                <strong>ITSM & AIOps Automation</strong>
-                BMC Helix Discovery, CMDB, ITAM, TrueSight Orchestration, MS Power Automate
+            <div class="metric-card">
+                <div class="metric-label">CUSTOM PIPELINES</div>
+                <div class="metric-value">30+</div>
+                <div class="metric-desc">Automated ITSM discovery imports</div>
             </div>
-            <div class="skills-category">
-                <strong>Remote Delivery Tools</strong>
-                Asynchronous Collaboration, MS Teams, Post-Mortem Methodologies
+            <div class="metric-card">
+                <div class="metric-label">SRE METHODOLOGIES</div>
+                <div class="metric-value">AIOps</div>
+                <div class="metric-desc">Topology-based alert enrichment</div>
             </div>
         </div>
-    </section>
 
-    <section id="experience">
-        <h2>Professional Experience</h2>
-
-        <div class="job">
-            <div class="job-header">
-                <span class="company-location">Wegmans Food Markets, Inc.</span>
-                <span class="job-date">Rochester, NY (Remote)</span>
-            </div>
+        <!-- TWO-COLUMN WORKSPACE -->
+        <div class="workspace">
             
-            <!-- Current SRE Role -->
-            <div class="sub-job" style="border-left: 2px solid var(--accent-color);">
-                <div class="job-header">
-                    <span class="job-title">Service Reliability Engineer</span>
-                    <span class="job-date">October 2025 – Present</span>
+            <!-- LEFT WORKSPACE: SIDEBAR PANELS -->
+            <aside>
+                
+                <!-- SUMMARY PANEL -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-terminal"></i>
+                            <span>sys.summary</span>
+                        </div>
+                        <span class="panel-status-indicator">[OK]</span>
+                    </div>
+                    <div class="panel-body">
+                        <p style="margin: 0; line-height: 1.6; font-size: 0.95rem; color: var(--text-secondary);">
+                            Growth-driven SRE specializing in enterprise observability and topology-driven operations. Proven track record of transforming raw telemetry logs into context-rich alerts by architecting and executing robust Configuration Management Databases (CMDB). Expert in binding infrastructure metrics directly to service topology to scale monitoring efficiency.
+                        </p>
+                    </div>
                 </div>
-                <ul>
-                    <li>Architected and executed the company-wide CMDB and IT Asset Management (ITAM) overhaul, successfully mapping complex environmental data to live service topologies.</li>
-                    <li>Revolutionized incident response workflows by binding raw metrics, logs, and events directly to topology components, providing immediate context to alerts and driving down Mean Time to Resolution (MTTR).</li>
-                    <li>Continually push the boundaries of enterprise monitoring by designing and scaling telemetry frameworks using OpenTelemetry and Grafana to track high-density infrastructure data.</li>
-                    <li>Optimize efficiency and engineering velocity by integrating GitHub Copilot and M365 Copilot into daily infrastructure-as-code and integration scripting.</li>
-                </ul>
-            </div>
 
-            <!-- Senior Admin Role -->
-            <div class="sub-job">
-                <div class="job-header">
-                    <span class="job-title">Senior Systems Administrator – ITSM & AIOps</span>
-                    <span class="job-date">January 2024 – October 2025</span>
-                </div>
-                <ul>
-                    <li>Designed and maintained over 30 custom automated import processes (utilizing APIs, database connections, and automated CSV ingestions) to bridge crucial visibility gaps left by standard discovery tools.</li>
-                    <li>Leveraged TrueSight Orchestration and MS Power Automate to engineer resilient pipeline automation, ensuring real-time configuration accuracy across the enterprise ecosystem.</li>
-                    <li>Mastered BMC Helix Discovery ecosystem, authoring integration steps to continuously capture fluctuating infrastructure landscapes.</li>
-                </ul>
-            </div>
+                <!-- CORE TELEMETRY PANEL (SKILLS) -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>active.telemetry</span>
+                        </div>
+                        <span class="panel-status-indicator">[MONITORED]</span>
+                    </div>
+                    <div class="panel-body">
+                        
+                        <div class="skills-section">
+                            <div class="skills-category-title">Observability Stack</div>
+                            <div class="tag-container">
+                                <span class="tag tag-hot">OpenTelemetry (OTel)</span>
+                                <span class="tag tag-hot">Grafana</span>
+                                <span class="tag">BMC Helix Operations</span>
+                                <span class="tag">Dynatrace</span>
+                                <span class="tag">Event Correlation</span>
+                            </div>
+                        </div>
+                        
+                        <div class="skills-section" style="margin-top: 20px;">
+                            <div class="skills-category-title">Cloud & Automation</div>
+                            <div class="tag-container">
+                                <span class="tag tag-hot">Microsoft Azure</span>
+                                <span class="tag">Azure APIM</span>
+                                <span class="tag">TrueSight Orchestration</span>
+                                <span class="tag">MS Power Automate</span>
+                                <span class="tag">Github & CI/CD</span>
+                            </div>
+                        </div>
 
-            <!-- Previous Progression Summary -->
-            <div class="sub-job">
-                <div class="job-header">
-                    <span class="job-title">Progressive Technical Advancement</span>
-                    <span class="job-date">Prior Tenures</span>
+                        <div class="skills-section" style="margin-top: 20px;">
+                            <div class="skills-category-title">SRE Paradigms</div>
+                            <div class="tag-container">
+                                <span class="tag">Async Collaboration</span>
+                                <span class="tag">Incident Post-Mortems</span>
+                                <span class="tag">CMDB & Topology</span>
+                                <span class="tag">ITAM Integration</span>
+                                <span class="tag tag-hot">AI Assistants (Copilots)</span>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-                <p style="margin: 5px 0 0 0; font-size: 0.95rem; color: var(--text-main);">
-                    Advanced through successive delivery roles based on high performance and automation initiatives: 
-                    <strong>IT Systems Administrator (ITSM)</strong> • 
-                    <strong>IT Service Delivery Coordinator</strong> • 
-                    <strong>IT Operations Service Technician</strong> • 
-                    <strong>IT Support Center Technician</strong>.
-                </p>
-            </div>
+
+            </aside>
+
+            <!-- RIGHT WORKSPACE: MAIN TELEMETRY PANELS -->
+            <main>
+                
+                <!-- SERVICE TOPOLOGY PANEL (EXPERIENCE) -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-network-wired"></i>
+                            <span>service.topology_history</span>
+                        </div>
+                        <span class="panel-status-indicator">[CONNECTED]</span>
+                    </div>
+                    <div class="panel-body">
+                        
+                        <div class="timeline">
+                            
+                            <!-- CURRENT ROLE -->
+                            <div class="timeline-event active">
+                                <div class="timeline-dot"></div>
+                                <div class="job-meta">
+                                    <h3 class="job-role">Service Reliability Engineer</h3>
+                                    <span class="job-company">Wegmans Food Markets, Inc.</span>
+                                    <span class="job-duration">Oct 2025 – Present</span>
+                                </div>
+                                <div class="timeline-body">
+                                    <ul>
+                                        <li>Architected and executed the company-wide CMDB and IT Asset Management (ITAM) overhaul, successfully mapping complex environmental data to live service topologies.</li>
+                                        <li>Revolutionized incident response workflows by binding raw metrics, logs, and events directly to topology components, providing immediate context to alerts and driving down Mean Time to Resolution (MTTR).</li>
+                                        <li>Continually push the boundaries of enterprise monitoring by designing and scaling telemetry frameworks using OpenTelemetry and Grafana to track high-density infrastructure data.</li>
+                                        <li>Champion efficiency and engineering velocity by integrating GitHub Copilot and M365 Copilot into daily infrastructure-as-code and scripting workflows.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- SENIOR ADMIN ROLE -->
+                            <div class="timeline-event">
+                                <div class="timeline-dot"></div>
+                                <div class="job-meta">
+                                    <h3 class="job-role">Senior Systems Administrator – ITSM & AIOps</h3>
+                                    <span class="job-company">Wegmans Food Markets, Inc.</span>
+                                    <span class="job-duration">Jan 2024 – Oct 2025</span>
+                                </div>
+                                <div class="timeline-body">
+                                    <ul>
+                                        <li>Designed and maintained over 30 custom automated import processes (utilizing APIs, database connections, and automated CSV ingestions) to bridge crucial visibility gaps left by standard discovery tools.</li>
+                                        <li>Leveraged TrueSight Orchestration and MS Power Automate to engineer resilient pipeline automation, ensuring real-time configuration accuracy across the enterprise ecosystem.</li>
+                                        <li>Mastered BMC Helix Discovery ecosystem, authoring integration steps to continuously capture fluctuating infrastructure landscapes.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- PROGRESSIVE GROWTH ROLE -->
+                            <div class="timeline-event">
+                                <div class="timeline-dot"></div>
+                                <div class="job-meta">
+                                    <h3 class="job-role">Progressive Technical Growth</h3>
+                                    <span class="job-company">Wegmans Food Markets, Inc.</span>
+                                    <span class="job-duration">Prior Tenures</span>
+                                </div>
+                                <div class="timeline-body">
+                                    <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--text-secondary);">
+                                        Earned consistent promotion through various IT operational layers, establishing a foundational system visibility and client-centric architecture focus.
+                                    </p>
+                                    
+                                    <div class="nested-progression">
+                                        <div class="nested-title">IT Systems Administrator (ITSM)</div>
+                                        <div class="nested-dates">Jan 2022 – Dec 2023</div>
+                                    </div>
+                                    <div class="nested-progression">
+                                        <div class="nested-title">IT Service Delivery Coordinator</div>
+                                        <div class="nested-dates">Jun 2020 – Dec 2021</div>
+                                    </div>
+                                    <div class="nested-progression">
+                                        <div class="nested-title">IT Operations Service Technician</div>
+                                        <div class="nested-dates">Mar 2018 – May 2020</div>
+                                    </div>
+                                    <div class="nested-progression">
+                                        <div class="nested-title">IT Support Center Technician</div>
+                                        <div class="nested-dates">Aug 2016 – Feb 2018</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </main>
+
         </div>
-    </section>
-</div>
 
+    </div>
+
+    <!-- SCRIPT FOR LIGHT / DARK THEME SWITCHING -->
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            updateToggleUI(newTheme);
+        }
+
+        function updateToggleUI(theme) {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (theme === 'light') {
+                icon.className = 'fa-solid fa-moon';
+                text.innerText = 'DARK MODE';
+            } else {
+                icon.className = 'fa-solid fa-sun';
+                text.innerText = 'LIGHT MODE';
+            }
+        }
+
+        // Check local storage or system preference on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+            
+            let initialTheme = 'dark'; // default to dark-dashboard mode
+            if (savedTheme) {
+                initialTheme = savedTheme;
+            } else if (systemPrefersLight) {
+                initialTheme = 'light';
+            }
+            
+            document.documentElement.setAttribute('data-theme', initialTheme);
+            updateToggleUI(initialTheme);
+        });
+    </script>
 </body>
 </html>
